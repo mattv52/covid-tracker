@@ -1,0 +1,228 @@
+.sidebar-container {
+  position: fixed;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #006BFF;
+  color: #fff;
+  width: 220px;
+  height: 100%;
+  left: 0;
+
+}
+
+.content-container {
+  padding-top: 15px;
+}
+
+.sidebar-logo {
+  padding: 10px 15px 10px 30px;
+  font-size: 20px;
+  background-color: #2574A;
+}
+
+.sidebar-navigation {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  position: relative;
+}
+
+.sidebar-navigation li {
+  background-color: transparent;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  line-height: 20px;
+  font-size: 13px;
+  padding-left:10px;
+}
+
+.sidebar-navigation li a {
+  padding: 10px 15px 10px 30px;
+  display: block;
+  color: #fff;
+}
+
+.sidebar-navigation li .fa {
+  margin-right: 10px;
+}
+
+.sidebar-navigation li a:active,
+.sidebar-navigation li a:hover,
+.sidebar-navigation li a:focus {
+  text-decoration: none;
+  outline: none;
+}
+
+.sidebar-navigation li::before {
+  background-color: #025EEC;
+  position: absolute;
+  content: '';
+  height: 100%;
+  left: 0;
+  top: 0;
+  -webkit-transition: width 0.2s ease-in;
+  transition: width 0.2s ease-in;
+  width: 3px;
+  z-index: -1;
+}
+
+.sidebar-navigation li:hover::before {
+  width: 100%;
+}
+
+.sidebar-navigation .header {
+  font-size: 12px;
+  text-transform: uppercase;
+  background-color: #0C01E9 ;
+  padding: 10px 15px 10px 30px;
+}
+
+.sidebar-navigation .header::before {
+  background-color: transparent;
+}
+
+.content-container {
+  padding-left: 220px;
+}
+.head {
+  padding-top: 10px;
+  height: 110px;
+  text-align: center;
+  background-color: #006BFF;
+  border-radius: 10px 10px 10px 10px;
+  color: #fff;
+}
+.load {
+  color: #fff;
+}
+.load:hover {
+  color: #fff;
+}
+.user-info {
+  font-size: 12px;
+}
+#profileImg {
+  margin-left: 30px;
+  border-radius: 50px 50px 50px 50px;
+  border: 2px solid #fff;
+}
+#map {
+  margin: auto;
+  border-radius: 10px 10px 10px 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+  height: 75vh;
+}
+#checkin {
+  width: 50%;
+  height: 45%;
+}
+#manage {
+  border-radius: 10px 10px 10px 10px;
+  width: 60%;
+  height: 100%;
+}
+
+#manageVenue {
+  border-radius: 10px 10px 10px 10px;
+  width: 60%;
+  height: 50%;
+}
+
+#delete {
+  border-radius: 10px 10px 10px 10px;
+  width: 30%;
+  height: 35%;
+}
+
+#deletevenueHealth {
+  border-radius: 10px 10px 10px 10px;
+  width: 30%;
+  height: 35%;
+}
+
+#deleteHealth {
+  border-radius: 10px 10px 10px 10px;
+  width: 30%;
+  height: 35%;
+}
+
+#createHotspot {
+  border-radius: 10px 10px 10px 10px;
+  width: 50%;
+}
+
+#createHealthAccount {
+  border-radius: 10px 10px 10px 10px;
+  width: 65%;
+}
+
+#manageUserHealth {
+  border-radius: 10px 10px 10px 10px;
+  width: 60%;
+  height: 100vh;
+}
+
+.modal-content {
+  background: linear-gradient(to left, #33ccff 0%, #0066ff 100%);
+  color: #fff;
+}
+.footer-text {
+  padding-top: 10px;
+  padding-right: 30px;
+  padding-left: 30px;
+}
+.profileInfo {
+  margin-top: -72px;
+  margin-left: 60%;
+}
+
+#checkInError {
+  color: red;
+  margin-bottom: -18px;
+}
+#checkin-table {
+  border: solid #ddd 1px;
+  border-collapse: separate !important;
+  border-spacing: 0;
+  -moz-border-radius: 1px;
+  -webkit-border-radius: 1px;
+  border-radius: 6px;
+  -webkit-box-shadow: 0 1px 1px #ccc;
+  -moz-box-shadow: 0 1px 1px #ccc;
+  box-shadow: 0 1px 1px #ddd;
+  width: 100%;
+  margin-bottom: 100px;
+
+}
+
+#checkin-table  td, #checkin-table  th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+#checkin-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#checkin-table  tr:hover {
+  background-color: #ddd;
+}
+
+#checkin-table  th {
+
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #006BFF;
+  color: white;
+}
+#venue-check-in-history, #user-check-in-history {
+  padding-top: 15px;
+  height: 80px;
+  text-align: center;
+  background-color: #006BFF;
+  border-radius: 10px 10px 10px 10px;
+  color: #fff;
+}

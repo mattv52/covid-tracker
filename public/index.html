@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel = "stylesheet" href = "/stylesheets/style.css">
+  <!--Let browser know website is optimized for mobile-->
+
+  <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <meta name="google-signin-client_id" content="810192089400-ef5k6jellspebjam9ehav5c0jul9dle6.apps.googleusercontent.com">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
+
+
+  <!--<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>-->
+
+
+<!--810192089400-ef5k6jellspebjam9ehav5c0jul9dle6.apps.googleusercontent.com-->
+<!--ADSnPkevdfcQRbGLng475kzh-->
+
+</head>
+
+<body>
+  <div class = "container" id="app">
+    <div class = "container-left"></div>
+    <div class = "container-right">
+      <div id = "login">
+        <div class = "header">
+          <h2 class = "animate a1">LOGIN</h2>
+          <h4 class = "animate a2">Log in using your email and password</h4>
+        </div>
+        <form class = "form">
+          <h6 id="loginError">Email address and/or password incorrect</h6>
+          <h6 id="inputEmpty">Input is empty</h6>
+          <input type = "email" name="email_" id="email_" class = "form-field animate a3" placeholder = "Email Address">
+          <input type = "password" name="password_" id="password_" class = "form-field animate a4" placeholder = "Password">
+
+          <button class = "formButton animate a5" onclick="login()" type="button">LOGIN</button>
+        </form>
+        <button id = "signuplink" class = "formButton animate a6" style="width:440px;">Don't have an account?</button>
+         <div class="g-signin2 animate a6" style ="margin-top:10px; width: 440px; height:40px; font-size:100px; display:block;" id="gSignIn" data-onsuccess="onSignIn"></div>
+      </div>
+
+      <div id = "signup">
+        <div class = "header">
+          <h2 class = "animate a1">SIGNUP</h2>
+          <h4 class = "animate a2">Create an Account</h4>
+        </div>
+
+        <form class = "form" style="margin-top:-25px;">
+          <h6 id="signupInputEmpty">Input empty</h6>
+          <h6 id="signUpError">Email already exists</h6>
+          <input type = "text" class = "form-field animate a3" id = "first-name" name="first-name" placeholder = "First Name" required />
+
+          <input type = "text" class = "form-field animate a3" id = "last-name" name="last-name" placeholder = "Last Name" required />
+
+          <input type = "email" class = "form-field animate a3" id = "email" name="email" placeholder = "Email Address" required />
+
+          <select class = "form-field animate a3" name="user_status" id = "user_status" onchange="ifVenueOwner(this);" required />
+            <option value="status"selected disabled>Status</option>
+            <option value="user">User</option>
+            <option value="venue_owner">Venue Owner / Manager</option>
+          </select>
+
+          <select name="venue" id="venue" class="form-field" style="display:none;" required />
+            <option value="NULL"selected disabled>Venue</option>
+          </select>
+
+
+         <input type = "password" name="password" id = "password" class = "form-field animate a4" placeholder = "Password" required />
+
+         <span class="password-strength"><h6 id="password-strength-text" style="margin-top:0px;"></h6></span>
+
+
+         <input type = "password" name="confirmPassword" id="confirmPassword" class = "form-field animate a3" style="margin-top:-10px; margin-bottom: -10px;" onkeyup="checkPassword();" placeholder = "Confirm Password" required />
+          <h6 id="confirmPasswordMessage"></h6>
+
+
+
+
+          <label class="emailCheck animate animate a3">
+            <input type="checkbox" class="filled-in" id="email-notification" value="true"/>
+            <span>Would you like Email Notifications?</span>
+          </label>
+
+          <button type="button" id ="signup" class = "formButton animate a6" onclick="register()">SIGNUP</button>
+        </form>
+        <button id = "loginlink" class = "formButton animate a6" style="width:440px;">Already have an account?</button>
+      </div>
+
+    </div>
+
+
+  </div>
+
+  <script src="/javascripts/login-register.js"></script>
+  <script type="text/javascript"></script>
+</body>
+</html>

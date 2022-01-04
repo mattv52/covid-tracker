@@ -1,0 +1,17 @@
+CHANGE HOTSPOTS SECTION ABOVE MAP TO ACCURATLY DESCRIBE APPLICAITON BETTER.
+(maybe make it change depending on whos signed in)
+(maybe include a legend of what color marker means what?)
+
+For venue owners:
+    - manage venue details
+
+For Admins/Health Officials
+    - create venue
+
+Email notif
+    - user request for email notifications that include list of current hotspots and/or if theyve been to one
+
+For map:
+    - can checkin via map (optional)
+    - hotspots on map show active ones in red, unactive another color etc.
+

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="/stylesheets/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>Hotspots</title>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+  <meta name="google-signin-client_id" content="810192089400-ef5k6jellspebjam9ehav5c0jul9dle6.apps.googleusercontent.com">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+  <div id="app">
+    <div class="sidebar-container">
+      <div class="sidebar-logo">
+
+          <img id="profileImg" src="" style="height: 100px; width:100px;"><br>
+          <div style="text-align: center; padding-right: 15px;">
+          <span class="user-info" id="name" ></span><br>
+          <span class="user-info" id="email"></span>
+          </div>
+
+      </div>
+      <ul class="sidebar-navigation">
+        <div v-if="user">
+          <li class="header">USER</li>
+          <!--<li><a onclick="loadHotspot()"  href="#">HOTSPOTS</a></li>-->
+          <li><a class="modal-trigger" href="#checkin">CHECK-IN</a></li>
+          <li><a href="#user-check-in-history">CHECK-IN HISTORY</a></li>
+        </div>
+
+        <div v-if="venueOwner">
+          <li class="header">VENUE OWNERS</li>
+          <li><a class="modal-trigger" href="#manageVenue">MANAGE VENUE</a></li>
+          <li><a href="#venue-check-in-history">VENUE CHECK-IN HISTORY</a></li>
+        </div>
+
+        <div v-if="healthOfficial">
+          <li class="header">HEALTH OFFICIAL</li>
+          <li><a class="modal-trigger" href="#createHealthAccount">CREATE HEALTH OFFICIAL ACCOUNT</a></li>
+          <li><a class="modal-trigger" href="#createVenue">CREATE VENUE</a></li>
+          <li><a class="modal-trigger" href="#manageVenueHealth">MANAGE VENUES</a></li>
+          <li><a class="modal-trigger" href="#createHotspot">CREATE HOTSPOTS</a></li>
+          <li><a class="modal-trigger" href="#manageHotspot">MANAGE HOTSPOTS</a></li>
+          <li><a class="modal-trigger" href="#manageUserHealth">MANAGE USERS</a></li>
+          <li><a href="#scroll-history">VIEW CHECKIN HISTORY</a></li>
+        </div>
+
+        <li class="header">PROFILE</li>
+
+        <li id="manageProfile"><a href="#manage" class="modal-trigger">MANAGE PROFILE</a></li>
+        <!--<li><a href="#" onclick="signOut();">SIGN OUT</a></li>-->
+        <li><a href="#" onclick="signOut()">Signout</a></li>
+      </ul>
+    </div>
+
+    <div class="content-container">
+      <div class="container-fluid">
+        <div class="head">
+          <h1 id="header">HOTSPOTS</h1>
+          <p id="headerInfo">The map below contains all the COVID-19 hotspots. If you need to check-in please visit our <a class="modal-trigger" style="color: #fff; text-decoration:underline;" href="#checkin">CHECK-IN</a> page </p>
+        </div>
+        <!--<h1>MAP</h1>-->
+        <div id='map'></div>
+        <div v-if="healthOfficial">
+          <h1 id="scroll-history">SELECT A USER</h1>
+          <select style="display:block;" id="selectUserCheckinHistory" onchange="loadUserCheckinHistory()">
+            <option value="NULL" disabled selected>User</option>
+            <option v-for="u in allUsers" v-bind:value="u.u_id">{{ u.first_name }} {{ u.last_name }}</option>
+          </select>
+        </div>
+        <div v-if="(user || healthOfficial) && userCheckins.length > 0">
+          <h1 id="user-check-in-history">CHECK-IN HISTORY</h1>
+          <table id="checkin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Venue</th>
+                <th>Current Hotspot</th>
+                <th>Start Date</th>
+                <th>Positive Cases</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="venue in userCheckins">
+                <td>{{ venue.date }}</td>
+                <td>{{ venue.time }}</td>
+                <td>{{ venue.name }}</td>
+                <td>{{ venue.active }}</td>
+                <td>{{ venue.start }}</td>
+                <td>{{ venue.positive_tests }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="healthOfficial">
+          <h1>SELECT A VENUE</h1>
+          <select style="display:block;" id="selectVenueCheckinHistory" onchange="loadVenueCheckinHistory()">
+            <option value="NULL" disabled selected>Venue</option>
+            <option v-for="v in allVenues" v-bind:value="v.v_id">{{ v.name }}</option>
+          </select>
+        </div>
+        <div v-if="(venueOwner || healthOfficial) && venueCheckins.length > 0">
+          <h1 id="venue-check-in-history">VENUE CHECK-IN HISTORY</h1>
+          <table id="checkin-table">
+            <thead>
+              <tr>
+                <th>DATE</th>
+                <th>TIME</th>
+                <th>NAME</th>
+                <th>INFECTED</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in venueCheckins">
+                <td>{{ user.date }}</td>
+                <td>{{ user.time }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.infected }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modals">
+
+    <div id="manage" class="modal">
+      <div class="modal-content">
+        <h4>MANAGE PROFILE</h4>
+        <p>Manage your profile here</p>
+        <p class="profileInfo">Name: <span id="profileName"></span><br>
+        <span>Email Address: <span id="profileEmail"></span></span></p>
+      </div>
+      <div class="footer-text">
+        <form class="col s12">
+          <div class="row">
+            <div class="input-field col s6">
+              <i class="material-icons prefix">account_circle</i>
+              <input id="firstName" type="text" class="validate" placeholder="" required>
+              <label for="firstName">First Name</label>
+            </div>
+            <div class="input-field col s6">
+              <i class="material-icons prefix">account_circle</i>
+              <input id="lastName" type="text" class="validate" placeholder="" required>
+              <label for="lastName">Last Name</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input id="email1" type="email" class="validate" placeholder="" required>
+              <label for="email">Email</label>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">lock</i>
+              <input id="password" type="password" class="validate" placeholder="" required>
+              <label for="password">Password</label>
+            </div>
+          </div>
+          <label>
+            <input id="emailNotifActive" type="checkbox" class="validate filled-in" required>
+            <span>Are Email Notifications On?</span>
+          </label>
+          <br>
+          <button class="btn waves-effect waves-light right" type="button" onclick="manageUser()">UPDATE INFORMATION
+            <i class="material-icons right">send</i>
+          </button>
+          <a href="#delete" class="modal-trigger" id="deleteAccount">
+            <button class="btn waves-effect waves-light left" type="button">DELETE ACCOUNT
+              <i class="material-icons right">delete</i>
+            </button>
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <div id="manageUserHealth" class="modal">
+      <div class="modal-content">
+        <h4>MANAGE A USER PROFILE</h4>
+        <p>Manage a users profile here</p>
+      </div>
+      <div class="footer-text">
+        <form id="manageUserHealthForm" class="col s12">
+          <div class="row">
+            <div class="col s12">
+              <select style="display:block;" id="manageUserDropdown" onchange="loadManageUser()">
+                <option value="NULL" disabled selected>User</option>
+                <option v-for="u in allUsers" v-bind:value="u.u_id">{{ u.first_name }} {{ u.last_name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s6">
+              <i class="material-icons prefix">account_circle</i>
+              <input id="manageUserFirst" type="text" class="validate" placeholder="" required>
+              <label for="manageUserFirst">First Name</label>
+            </div>
+            <div class="input-field col s6">
+              <i class="material-icons prefix">account_circle</i>
+              <input id="manageUserLast" type="text" class="validate" placeholder="" required>
+              <label for="manageUserLast">Last Name</label>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">lock</i>
+              <input id="manageUserPassword" type="password" class="validate" placeholder="" required>
+              <label for="manageUserPassword">Password</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input id="manageUserEmail" type="email" class="validate" placeholder="" required>
+              <label for="manageUserEmail">Email</label>
+            </div>
+              <label>
+                <input id="emailNotifHealth" type="checkbox" class="validate filled-in" required>
+                <span>Are Email Notifications On?</span>
+              </label>
+          </div>
+
+          <!--<div class="row">-->
+          <!--  <div class="input-field col s3 left">-->
+          <!--    <label>-->
+          <!--      <input id="manageUserEmailNotif" type="checkbox" class="validate filled-in" required>-->
+          <!--      <span>Would you like email notifications?</span>-->
+          <!--    </label>-->
+          <!--  </div>-->
+          <!--</div>-->
+          <button style="margin-top: -20px;" class="btn waves-effect waves-light right" type="reset" onclick="manageUserHealth()">UPDATE INFORMATION
+            <i class="material-icons right">send</i>
+          </button>
+          <a href="#deleteHealth" class="modal-trigger" id="deleteAccount">
+            <button style="margin-top: -20px;" class="btn waves-effect waves-light left" type="reset">DELETE ACCOUNT
+              <i class="material-icons right">delete</i>
+            </button>
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <div id="manageVenue" class="modal">
+      <div class="modal-content">
+        <h4>MANAGE YOUR VENUE</h4>
+        <p>Manage your venue here</p>
+      </div>
+      <div class="footer-text">
+        <form class="col s12">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">business</i>
+              <input id="manageVName" type="text" class="validate" placeholder="" required>
+              <label for="manageVName">Name</label>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right" type="reset" onclick="manageVenue()">UPDATE INFORMATION
+            <i class="material-icons right">send</i>
+          </button>
+          <a href="#delVenue" class="modal-trigger" id="deleteVenue">
+            <button class="btn waves-effect waves-light left" type="reset">DELETE VENUE
+              <i class="material-icons right">delete</i>
+            </button>
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <div id="manageVenueHealth" class="modal">
+      <div class="modal-content">
+        <h4>MANAGE A VENUE</h4>
+        <p>Manage a venue here</p>
+      </div>
+      <div class="footer-text">
+        <form class="col s12">
+          <div class="row">
+            <div class="col s12">
+              <select style="display:block;" id="manageVenueDropdown" onchange="loadManageVenue()">
+                <option value="NULL" disabled selected>Venue</option>
+                <option v-for="v in allVenues" v-bind:value="v.v_id">{{ v.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">business</i>
+              <input id="manageVenueNameHealth" type="text" class="validate" placeholder="" required>
+              <label for="manageVenueNameHealth">Name</label>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right" type="reset" onclick="manageVenueHealth()">UPDATE INFORMATION
+            <i class="material-icons right">send</i>
+          </button>
+          <a href="#deleteVenueHealth" class="modal-trigger" id="deleteVenue">
+            <button class="btn waves-effect waves-light left" type="reset">DELETE VENUE
+              <i class="material-icons right">delete</i>
+            </button>
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <div id="createHealthAccount" class="modal">
+      <div class="modal-content">
+        <h4>CREATE ANOTHER HEALTH OFFICIAL ACCOUNT</h4>
+        <p>Create profile here</p>
+      </div>
+      <div class="footer-text">
+        <form class="col s12">
+          <div class="row">
+            <div class="input-field col s6">
+              <i class="material-icons prefix">account_circle</i>
+              <input id="healthOfficalFirst" type="text" class="validate" required>
+              <label for="healthOfficalFirst">First Name</label>
+            </div>
+            <div class="input-field col s6">
+              <i class="material-icons prefix">account_circle</i>
+              <input id="healthOfficalLast" type="text" class="validate" required>
+              <label for="healthOfficalLast">Last Name</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input id="healthOfficalEmail" type="email" class="validate" required>
+              <label for="healthOfficalEmail">Email</label>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">lock</i>
+              <input id="healthOfficalPassword" type="password" class="validate" required>
+              <label for="healthOfficalPassword">Password</label>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right" type="button" onclick="createHealthOfficialAccoount()">CREATE ACCOUNT
+            <i class="material-icons right">send</i>
+          </button>
+          <button class="btn waves-effect waves-light left modal-close" type="button">CANCEL
+            <i class="material-icons right">clear</i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="createVenue" class="modal">
+      <div class="modal-content">
+        <h4>CREATE VENUE</h4>
+        <p>Create venue here (longitude and latitude can be found via google maps)</p>
+      </div>
+      <div class="footer-text">
+        <form class="col s12">
+          <div class="row">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">business</i>
+              <input id="venueName" type="text" class="validate" required>
+              <label for="venueName">Name</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s6">
+              <input id="venueLongitude" type="number" class="validate" required>
+              <label for="venueLongitude">Longitude</label>
+            </div>
+            <div class="input-field col s6">
+              <input id="venueLatitude" type="number" class="validate" required>
+              <label for="vanueLatitude">Latitude</label>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right" type="reset" onclick="createVenue()">CREATE VENUE
+            <i class="material-icons right">send</i>
+          </button>
+          <button class="btn waves-effect waves-light left modal-close" type="reset">CANCEL
+            <i class="material-icons right">clear</i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="deleteHealth" class="modal deleteModal">
+      <div class="modal-content">
+        <h4>DELETE ACCOUNT</h4>
+        <p>Are you sure you want to delete this account?</p>
+      </div>
+      <div class="footer-text">
+        <form>
+          <button type="button" onclick="delAccountHealth()" class="btn waves-effect waves-light left">YES
+            <i class="material-icons right">delete</i>
+          </button>
+          <button type="button" class="btn waves-effect waves-light right modal-close">NO</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="deleteVenueHealth" class="modal deleteModal">
+      <div class="modal-content">
+        <h4>DELETE VENUE</h4>
+        <p>Are you sure you want to delete this venue?</p>
+      </div>
+      <div class="footer-text">
+        <form>
+          <button type="button" onclick="delVenueHealth()" class="btn waves-effect waves-light left">YES
+            <i class="material-icons right">delete</i>
+          </button>
+          <button type="button" class="btn waves-effect waves-light right modal-close">NO</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="delVenue" class="modal deleteModal">
+      <div class="modal-content">
+        <h4>DELETE VENUE</h4>
+        <p>Are you sure you want to delete this venue?</p>
+      </div>
+      <div class="footer-text">
+        <form>
+          <button type="button" onclick="delVenue()" class="btn waves-effect waves-light left">YES
+            <i class="material-icons right">delete</i>
+          </button>
+          <button type="button" class="btn waves-effect waves-light right modal-close">NO</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="delete" class="modal deleteModal">
+      <div class="modal-content">
+        <h4>DELETE ACCOUNT</h4>
+        <p>Are you sure you want to delete your account?</p>
+      </div>
+      <div class="footer-text">
+        <form>
+          <button type="button" onclick="delAccount()" class="btn waves-effect waves-light left">YES
+            <i class="material-icons right">delete</i>
+          </button>
+          <button type="button" class="btn waves-effect waves-light right modal-close">NO</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="checkin" class="modal">
+      <div class="modal-content">
+        <h4>CHECK INTO A VENUE</h4>
+        <p>Please fill in the field below with the number code from the venue!</p>
+      </div>
+      <div class="footer-text">
+        <form>
+          <div class="input-field">
+            <i class="material-icons prefix">code</i>
+            <input id="venueID" type="text" class="validate">
+            <label for="icon_prefix">Venue Code</label>
+          </div>
+          <button id="checkinBtn" type="button" onclick="checkIn()" class="btn waves-effect waves-light right">Submit
+            <i class="material-icons right">send</i>
+          </button>
+          <p v-if="invalidCheckin" id="checkInError">Invalid Venue Code</p>
+        </form>
+      </div>
+    </div>
+
+    <div id="createHotspot" class="modal">
+      <div class="modal-content">
+        <h4>CREATE HOTSPOT</h4>
+        <p>Create hotspot here</p>
+      </div>
+      <div class="footer-text">
+        <form class="col s12">
+          <div class="row">
+            <div class="col s12">
+              <select style="display:block;" id="createHotspotVenue">
+                <option value="NULL" disabled selected>Venue</option>
+                <option v-for="v in notHotspotVenue" v-bind:value="v.v_id">{{ v.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s6">
+              <i class="material-icons prefix">event</i>
+              <input id="createHotspotStartDate" type="date" class="validate" required>
+              <label for="createHotspotStartDate">Start Date of Hotspot</label>
+            </div>
+            <div class="input-field col s6">
+              <input id="createHotspotCases" type="number" class="validate" required>
+              <label for="createHotspotCases">Total Positive Cases</label>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right" type="reset" onclick="createHotspot()">CREATE
+            <i class="material-icons right">add_circle_outline</i>
+          </button>
+          <button class="btn waves-effect waves-light left modal-close" type="reset">CANCEL
+            <i class="material-icons right">close</i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="manageHotspot" class="modal">
+      <div class="modal-content">
+        <h4>MANAGE HOTSPOT</h4>
+        <p>Manage hotspot here</p>
+      </div>
+      <div class="footer-text">
+        <form class="col s12">
+          <div class="row">
+            <div class="col s12">
+              <select style="display:block;" id="manageHotspotVenue" onchange="loadManageHotspot()">
+                <option value="NULL" disabled selected>Venue</option>
+                <option v-for="v in hotspotVenue" v-bind:value="v.v_id">{{ v.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s6">
+              <i class="material-icons prefix">event</i>
+              <input id="manageHotspotStartDate" type="date" class="validate" placeholder="" required>
+              <label for="manageHotspotStartDate">Start Date of Hotspot</label>
+            </div>
+            <div class="input-field col s3">
+              <input id="manageHotspotCases" type="number" class="validate" placeholder="" required>
+              <label for="manageHotspotCases">Total Positive Cases</label>
+            </div>
+            <div class="input-field col s3">
+              <label>
+                <input id="manageHotspotActive" type="checkbox" class="validate filled-in" required>
+                <span>Is Hotspot Active?</span>
+              </label>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light right" type="reset" onclick="manageHotspot()">UPDATE
+            <i class="material-icons right">send</i>
+          </button>
+          <button class="btn waves-effect waves-light left modal-close" type="reset">CANCEL
+            <i class="material-icons right">close</i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="/javascripts/vue.js"></script>
+  <script src="/javascripts/main.js"></script>
+  <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+
+
+  <script>
+//   function signOut() {
+//     var auth2 = gapi.auth2.getAuthInstance();
+//       auth2.signOut().then(function () {
+//         console.log('User signed out.');
+//       });
+//     // var xhr = new XMLHttpRequest();
+//     // xhr.open('POST', '/users/signout', true);
+//     // xhr.send();
+
+// }
+//     function onLoad() {
+//   gapi.load('auth2', function () {
+//         auth2 = gapi.auth2.init({
+//             client_id: '810192089400-ef5k6jellspebjam9ehav5c0jul9dle6.apps.googleusercontent.com'
+//         });
+//         auth2.attachClickHandler('gSignIn', {});
+//         auth2.isSignedIn.listen(signinChanged);
+//         auth2.currentUser.listen(userChanged);
+
+//     });
+
+
+//     var signinChanged = function (val) {
+//         $('#manageProfile').hide();
+//         vue.google = val;
+//         console.log('User signed in', val);
+//     };
+
+//     var userChanged = function (user) {
+//         if(user.getId()){
+//           console.log(user.getBasicProfile().getName());
+//           console.log(user.getBasicProfile().getEmail());
+//           console.log(user.getBasicProfile().getImageUrl());
+
+//           document.getElementById('profileImg').src = user.getBasicProfile().getImageUrl();
+//           document.getElementById('name').innerHTML = user.getBasicProfile().getName();
+//           document.getElementById('email').innerHTML = user.getBasicProfile().getEmail();
+//         }
+//     };
+//     // loadVenues();
+//     // loadHotspot();
+
+// }
+
+// function signOut() {
+
+
+//   document.getElementById("email").innerHTML = "";
+//   if($.trim($("#email").html())=='') {
+//     window.location.href = "/index.html";
+//   }
+
+// }
+
+function signOut() {
+      gapi.auth2.init();
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+      });
+      window.location.href = "/index.html";
+    }
+
+    function onLoad() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init();
+      });
+
+    }
+
+
+
+  </script>
+
+
+
+</body>
+</html>
